@@ -1,15 +1,15 @@
-# MIMIC-IV: Data Cleaning and Transformation Pipeline
+# MIMIC-IV: Data Cleaning and Predictive Modeling Pipeline
 
-This project focuses on cleaning and transforming raw MIMIC-IV tables into an analysis-friendly format for downstream machine learning and statistical analysis. It aggregates vital signs, lab results, and demographic features into a wide-format table at the ICU stay level (`icustay_id`).
+This project provides a pipeline for cleaning raw MIMIC-IV data and building predictive models to support critical care decisions in the ICU. The pipeline includes feature extraction and machine learning models for mortality prediction, length of stay estimation, complication risk assessment, and ICU readmission prediction.
 
 ---
 
 ## Objectives
 
-- Extract key features from `chartevents`, `labevents`, and patient tables.
-- Aggregate time-series data (first 24hr of ICU stay).
-- Produce a single, clean DataFrame with one row per `icustay_id`.
-- Store data in efficient formats for reuse in modeling tasks.
+- Clean and transform raw MIMIC-IV CSV files into an analysis-friendly format
+- Aggregate static and dynamic ICU features over the first 24 hours
+- Enable downstream modeling by exporting clean datasets in `.parquet` and `.csv` format
+- Implement 4 key predictive modeling tasks
 
 ---
 
@@ -25,6 +25,7 @@ This project focuses on cleaning and transforming raw MIMIC-IV tables into an an
 | `labevents.csv` | Lab results |
 | `d_items.csv` | Mapping `itemid` to label |
 ```
+All data files are assumed to be in `data/raw/`. This project uses MIMIC-IV v2.2 from [PhysioNet](https://physionet.org/content/mimiciv/2.2/).
 
 ---
 
@@ -33,29 +34,22 @@ This project focuses on cleaning and transforming raw MIMIC-IV tables into an an
 ```
 mimic-cleaning/
 ├── data/
-│ ├── raw/ # Raw CSV files
-│ └── processed/ # Output cleaned data
-├── notebooks/ # Optional: EDA and analysis
+│ ├── raw/ # Raw CSVs (excluded from Git)
+│ └── processed/ # Output features (ignored by Git)
+├── models/ # Modeling scripts for each task
+│ ├── train_mortality_model.py
+│ ├── train_icu_stay.py
+│ ├── train_sepsis_risk.py
+│ └── train_readmission_risk.py
+├── notebooks/ # Optional: EDA or analysis notebooks
 ├── src/
-│ ├── cleaning.py # Main data cleaning logic
-│ ├── feature_map.py # Custom itemid to feature mapping
+│ ├── cleaning.py # Main feature extraction logic
+│ └── feature_map.py # Custom ITEMID-to-feature mapping
+├── LICENSE
 ├── requirements.txt
+├── .gitignore
 └── README.md
 ```
-
----
-
-## How to Run
-
-1. Download MIMIC-IV CSVs and place under `data/raw/`.
-2. Create conda environment:
-   ```bash
-   conda create -n mimic-clean python=3.10 pandas numpy pyarrow
-   conda activate mimic-clean
-   pip install -r requirements.txt
-3. Run the cleaning script:
-   ```bash
-   python src/cleaning.py
 
 ---
 
@@ -78,6 +72,45 @@ df.to_csv("data/processed/icu_features.csv", index=False)
 ```
 
 ---
+
+## Predictive Models
+
+1. ICU or Hospital Mortality Prediction
+```bash
+python models/train_mortality_model.py
+```
+
+2. Length of Stay (LOS) Prediction
+```bash
+python models/train_icu_stay.py
+```
+
+3. Sepsis / Shock / Respiratory Failure Risk
+```bash
+python models/train_sepsis_risk.py
+```
+
+4. ICU Readmission Risk
+```bash
+python models/train_readmission_risk.py
+```
+
+---
+
+## Setup Instructions
+
+1. Download MIMIC-IV CSVs and place under `data/raw/`.
+2. Create conda environment:
+   ```bash
+   conda create -n mimic-clean python=3.10 pandas numpy pyarrow
+   conda activate mimic-clean
+   pip install -r requirements.txt
+3. Run the cleaning script (extract features):
+   ```bash
+   python src/cleaning.py
+
+---
+
 ## License
 This project is released under the MIT License.
 You are free to use, modify, and distribute this code with proper attribution.
